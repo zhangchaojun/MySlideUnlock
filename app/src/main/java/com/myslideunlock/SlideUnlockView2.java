@@ -1,10 +1,11 @@
 package com.myslideunlock;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.RectF;
 import android.os.Handler;
 import android.os.Message;
 import android.util.AttributeSet;
@@ -13,18 +14,23 @@ import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * Created by cj on 2017/6/26.
+ * Created by cj on 2017/7/3.
  */
 
-public class SlideUnlockView extends View {
+public class SlideUnlockView2 extends View {
 
     private static final String TAG = "cj";
-    private int defWidth = 500;
-    private int defHeight = 100;
+
+    private int defWidth ;
+    private int defHeight ;
+
     private Paint paint;
     private Paint paint2;
+
     private boolean onBlock;
+
     private boolean ifOnMove;
+
     private float offset;
     private float lastX;
 
@@ -46,52 +52,65 @@ public class SlideUnlockView extends View {
             }
         }
     };
+    private Bitmap bg;
+    private Bitmap icon;
 
-    public SlideUnlockView(Context context) {
+    public SlideUnlockView2(Context context) {
         super(context);
     }
 
-    public SlideUnlockView(Context context, AttributeSet attrs) {
+    public SlideUnlockView2(Context context, AttributeSet attrs) {
         super(context, attrs);
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.YELLOW);
 
         paint2 = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint2.setColor(Color.BLUE);
+
+        bg = BitmapFactory.decodeResource(getResources(), R.drawable.bg_slide);
+        defWidth = bg.getWidth();
+        Log.e(TAG, "SlideUnlockView2: "+defWidth );
+
+        icon = BitmapFactory.decodeResource(getResources(), R.drawable.icon);
+        defHeight = icon.getWidth();
+        Log.e(TAG, "SlideUnlockView2: "+defHeight );
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //如果是图片的话，图片是不会跟着设定的值变化的
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
-        if (widthMode == MeasureSpec.EXACTLY) {
-            defWidth = widthSize;
-        }
-        if (heightMode == MeasureSpec.EXACTLY) {
-            defHeight = heightSize;
-        }
+//        if (widthMode == MeasureSpec.EXACTLY) {
+//            defWidth = widthSize;
+//        }
+//        if (heightMode == MeasureSpec.EXACTLY) {
+//            defHeight = heightSize;
+//        }
         setMeasuredDimension(defWidth, defHeight);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        Log.e(TAG, "onDraw: 执行了");
-        RectF rectF = new RectF(0, 0, defWidth, defHeight);
-        canvas.drawRoundRect(rectF, defHeight / 2, defHeight / 2, paint2);
+
+        canvas.drawBitmap(bg,0,0,null);
 
         if (ifOnMove) {
-            float v = defHeight / 2 + offset;
-            if(v<defHeight/2){
-                v = defHeight/2;
+
+            if(offset<=0){
+                offset = 0;
             }
-            canvas.drawCircle(v, defHeight / 2, defHeight / 2 - 1, paint);
+
+            canvas.drawBitmap(icon,offset,0,null);
+
         } else {
-            canvas.drawCircle(defHeight / 2, defHeight / 2, defHeight / 2 - 1, paint);
+
+            canvas.drawBitmap(icon,0,0,null);
         }
 
     }
@@ -115,9 +134,11 @@ public class SlideUnlockView extends View {
                     ifOnMove = true;
                     offset = Math.abs(x - lastX);
                     Log.e(TAG, "offset是：" + offset);
+                    //往左滑，offset保持0
                     if (x <= defHeight / 2) {
                         offset = 0;
                     }
+                    //超过最右端圆心，固定住。
                     if (x >= defWidth - defHeight / 2) {
                         offset = defWidth - defHeight;
                     }
@@ -157,14 +178,13 @@ public class SlideUnlockView extends View {
         }
     }
 
-    private OnUnLockListener onUnLockListener;
+    private SlideUnlockView.OnUnLockListener onUnLockListener;
 
-    public void setOnUnLockListener(OnUnLockListener onUnLockListener) {
+    public void setOnUnLockListener(SlideUnlockView.OnUnLockListener onUnLockListener) {
         this.onUnLockListener = onUnLockListener;
     }
 
     public interface OnUnLockListener{
         void unLock(boolean lock);
     }
-
 }
