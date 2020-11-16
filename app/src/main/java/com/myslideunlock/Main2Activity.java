@@ -24,7 +24,7 @@ public class Main2Activity extends AppCompatActivity {
         slideUnlockView2.setOnUnLockListener(new SlideUnlockView.OnUnLockListener() {
             @Override
             public void unLock(boolean lock) {
-                Toast.makeText(Main2Activity.this,"解锁",Toast.LENGTH_SHORT).show();
+                Toast.makeText(Main2Activity.this,"解锁"+lock,Toast.LENGTH_SHORT).show();
             }
         });
     }
